@@ -1,4 +1,4 @@
-name: 🐳 Build docker image
+name: 🚀 CD
 
 on:
   push:
@@ -8,27 +8,50 @@ on:
     branches:
       - '[0-9]+.[0-9]+.[0-9]+'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
+    name: ⚒️ Build image
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
+      - name: ⚙️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: 🔑 Login to Docker Hub
         if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: 🐳 Build and push
         uses: docker/build-push-action@v5
         with:
           push: ${{ github.event_name != 'pull_request' }}
           tags: doonpy/bank-watcher:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: 🚀 Deploy
+    if: ${{ github.event_name != 'pull_request' }}
+    needs:
+      - build-image
+    env:
+      APP_ID: 03d58e70-7e0e-46b7-b299-64ce3902d84f
+    steps:
+      - name: 🌊 Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: 🚀 Create deployment
+        shell: bash
+        run: doctl apps create-deployment $APP_ID --wait
