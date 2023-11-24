@@ -1,0 +1,22 @@
+{
+  "name": "personal-bank-api",
+  "module": "src/main.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch run src/main.ts",
+    "build": "bun run build.ts",
+    "start": "bun run dist/main.js"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "prettier": "^3.1.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.13",
+    "puppeteer": "^21.5.2",
+    "winston": "^3.11.0"
+  }
+}
