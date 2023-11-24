@@ -8,6 +8,7 @@ export class PaymentReceipt {
 
   private readonly _client: Client;
   private readonly _databaseId: string;
+  private readonly _notificationUserId?: string;
 
   constructor() {
     assert(process.env.NOTION_DATABASE_ID, 'NOTION_DATABASE_ID is required');
@@ -16,6 +17,7 @@ export class PaymentReceipt {
       auth: process.env.NOTION_TOKEN,
     });
     this._databaseId = process.env.NOTION_DATABASE_ID;
+    this._notificationUserId = process.env.NOTION_NOTIFICATION_USER_ID;
   }
 
   public static getInstance(): PaymentReceipt {
@@ -55,7 +57,7 @@ export class PaymentReceipt {
   }
 
   public async create(item: Omit<PaymentReceiptRecord, 'id'>) {
-    await this._client.pages.create({
+    const result = await this._client.pages.create({
       parent: { database_id: this._databaseId },
       properties: {
         Name: {
@@ -70,5 +72,14 @@ export class PaymentReceipt {
         bankMetadata: { rich_text: [{ text: { content: item.bankMetadata } }] },
       },
     });
+    if (this._notificationUserId) {
+      await this._client.comments.create({
+        parent: { page_id: result.id },
+        rich_text: [
+          { mention: { user: { id: this._notificationUserId } } },
+          { text: { content: '\nNew transaction from bank statement' } },
+        ],
+      });
+    }
   }
 }
