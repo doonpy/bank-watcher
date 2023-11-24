@@ -134,7 +134,6 @@ export class Techcombank {
     const name = this.handleDescription(txn.description);
     const type = txn.creditDebitIndicator === 'DBIT' ? 'Outcome' : 'Income';
     const amount = parseInt(txn.transactionAmountCurrency.amount);
-    const date = new Date(txn.creationTime).toISOString();
     const note = 'From automation';
     const bankMetadata = JSON.stringify(txn);
 
@@ -143,7 +142,7 @@ export class Techcombank {
       type,
       amount: type === 'Income' ? amount : -amount,
       fund: 'Necessary',
-      date,
+      date: txn.creationTime,
       note,
       bankMetadata,
     });

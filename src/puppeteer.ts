@@ -12,7 +12,7 @@ export class Puppeteer {
     if (!this._instance) {
       const browser = await puppeteer.launch({
         headless: process.env.NODE_ENV === 'production',
-        executablePath: '/usr/bin/google-chrome',
+        // executablePath: '/usr/bin/google-chrome',
         args: ['--no-sandbox'],
       });
       this._instance = new Puppeteer(browser);
@@ -60,6 +60,11 @@ export class Puppeteer {
   public async close() {
     logger.info(`Close`, { scope: 'Puppeteer' });
     await this._page.close();
+  }
+
+  public async termniate() {
+    logger.info(`Terminate`, { scope: 'Puppeteer' });
+    await this._browser.close();
   }
 
   public async start() {

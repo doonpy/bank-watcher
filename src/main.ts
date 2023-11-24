@@ -2,11 +2,11 @@ import logger from './logger.ts';
 import { Techcombank } from './techcombank.ts';
 
 (async () => {
-  const techcombank = await Techcombank.getInstance();
   try {
+    const techcombank = await Techcombank.getInstance();
     await techcombank.start();
+    await techcombank.close();
   } catch (error) {
     logger.error(error);
-    await techcombank.restart();
   }
 })();
