@@ -62,9 +62,10 @@ export class Puppeteer {
     await this._page.close();
   }
 
-  public async termniate() {
+  public async terminate() {
     logger.info(`Terminate`, { scope: 'Puppeteer' });
     await this._browser.close();
+    process.exit(0);
   }
 
   public async start() {

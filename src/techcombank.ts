@@ -37,7 +37,7 @@ export class Techcombank {
     await this._puppeteer.goTo('https://onlinebanking.techcombank.com.vn');
     await this.login();
     await this.bindTrackingEvent();
-    this.bindAutoReload();
+    // this.bindAutoReload();
   }
 
   public async close() {
@@ -60,11 +60,11 @@ export class Techcombank {
     const dashboardXPath =
       '/html/body/tcb-root/tcb-layout/div[1]/div/div[2]/div/tcb-dashboard/div[2]';
     await this._puppeteer.waitForXPath(dashboardXPath);
-    await this._puppeteer.goTo(
-      'https://onlinebanking.techcombank.com.vn/dashboard/feed'
-    );
     await this._puppeteer.bindOnResponseEvent(
       this.onResponseHandler.bind(this)
+    );
+    await this._puppeteer.goTo(
+      'https://onlinebanking.techcombank.com.vn/dashboard/feed'
     );
   }
 
@@ -120,6 +120,8 @@ export class Techcombank {
     } else {
       logger.info('No new transaction', { scope: 'Techcombank' });
     }
+
+    await this._puppeteer.terminate();
   }
 
   private processNewTransaction(txn: Transaction) {

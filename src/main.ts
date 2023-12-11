@@ -5,7 +5,6 @@ import { Techcombank } from './techcombank.ts';
   try {
     const techcombank = await Techcombank.getInstance();
     await techcombank.start();
-    await techcombank.close();
   } catch (error) {
     logger.error(error);
   }
