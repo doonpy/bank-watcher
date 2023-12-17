@@ -28,10 +28,11 @@ export class PaymentReceipt {
     return this._instance;
   }
 
-  private async getLastNecessaryItem() {
+  private async getLastAutomationItem() {
     const response = await this._client.databases.query({
       database_id: this._databaseId,
       sorts: [{ property: 'Date', direction: 'descending' }],
+      filter: { property: 'Note', rich_text: { contains: 'From automation' } },
     });
     if (response.results.length === 0) {
       throw new Error('No data in database');
@@ -41,7 +42,7 @@ export class PaymentReceipt {
   }
 
   public async getLastTransactionCreationTime(): Promise<Date> {
-    const lastDataItem = await this.getLastNecessaryItem();
+    const lastDataItem = await this.getLastAutomationItem();
     const bankMetadata = lastDataItem.properties['bankMetadata'];
     if (
       bankMetadata.type === 'rich_text' &&
@@ -67,7 +68,6 @@ export class PaymentReceipt {
         Amount: { number: item.amount },
         Date: { date: { start: item.date } },
         Fund: { select: { name: item.fund } },
-        Type: { select: { name: item.type } },
         Note: { rich_text: [{ text: { content: item.note } }] },
         bankMetadata: { rich_text: [{ text: { content: item.bankMetadata } }] },
       },
