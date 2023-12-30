@@ -105,13 +105,16 @@ export class Techcombank {
     const lastTransactionCreationTime =
       await this._paymentReceipt.getLastTransactionCreationTime();
     logger.info(
-      `Last transaction creation time: ${lastTransactionCreationTime.toISOString()}`,
+      `Last transaction creation time: ${
+        lastTransactionCreationTime?.toISOString() || 'N/A'
+      }`,
       { scope: 'Techcombank' }
     );
     const newTransactions = transactions.filter(
       (t) =>
+        !lastTransactionCreationTime ||
         new Date(t.creationTime).getTime() >
-        lastTransactionCreationTime.getTime()
+          lastTransactionCreationTime?.getTime()
     );
     if (newTransactions.length > 0) {
       await Promise.all(
@@ -138,15 +141,18 @@ export class Techcombank {
     const amount = parseInt(txn.transactionAmountCurrency.amount);
     const note = 'From automation';
     const bankMetadata = JSON.stringify(txn);
+    const bankNo =
+      type === 'Income'
+        ? txn.additions?.creditAcctNo
+        : txn.additions?.debitAcctNo;
 
     return this._paymentReceipt.create({
       name,
-      type,
       amount: type === 'Income' ? amount : -amount,
-      fund: 'Necessary',
       date: txn.creationTime,
       note,
-      bankMetadata,
+      autoMetadata: bankMetadata,
+      bankNo: bankNo?.substring(bankNo?.length - 4),
     });
   }
 

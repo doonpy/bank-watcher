@@ -34,15 +34,16 @@ export class PaymentReceipt {
       sorts: [{ property: 'Date', direction: 'descending' }],
       filter: { property: 'Note', rich_text: { contains: 'From automation' } },
     });
-    if (response.results.length === 0) {
-      throw new Error('No data in database');
-    }
 
-    return response.results[0] as PageObjectResponse;
+    return response.results[0] as PageObjectResponse | undefined;
   }
 
-  public async getLastTransactionCreationTime(): Promise<Date> {
+  public async getLastTransactionCreationTime() {
     const lastDataItem = await this.getLastAutomationItem();
+    if (!lastDataItem) {
+      return;
+    }
+
     const bankMetadata = lastDataItem.properties['bankMetadata'];
     if (
       bankMetadata.type === 'rich_text' &&
@@ -67,9 +68,9 @@ export class PaymentReceipt {
         },
         Amount: { number: item.amount },
         Date: { date: { start: item.date } },
-        Fund: { select: { name: item.fund } },
         Note: { rich_text: [{ text: { content: item.note } }] },
-        bankMetadata: { rich_text: [{ text: { content: item.bankMetadata } }] },
+        autoMetadata: { rich_text: [{ text: { content: item.autoMetadata } }] },
+        'Bank no': { select: { name: item.bankNo } },
       },
     });
     if (this._notificationUserId) {

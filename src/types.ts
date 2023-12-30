@@ -39,6 +39,7 @@ export interface DebitTransaction extends TransactionBase {
 
 export interface CreditTransaction extends TransactionBase {
   type: 'CREDIT CARD';
+  additions: Additions;
 }
 
 export type Transaction = DebitTransaction | CreditTransaction;
@@ -48,8 +49,7 @@ export interface PaymentReceiptRecord {
   name: string;
   amount: number;
   date: string;
-  fund: 'Necessary' | 'Emergency' | 'Investing' | 'Sinking';
-  type: 'Income' | 'Outcome';
   note: string;
-  bankMetadata: string;
+  autoMetadata: string;
+  bankNo: string;
 }
