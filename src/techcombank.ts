@@ -140,7 +140,7 @@ export class Techcombank {
     const type = txn.creditDebitIndicator === 'DBIT' ? 'Outcome' : 'Income';
     const amount = parseInt(txn.transactionAmountCurrency.amount);
     const note = 'From automation';
-    const bankMetadata = JSON.stringify(txn);
+    const bankMetadata = JSON.stringify(txn, null, 2);
     const bankNo =
       type === 'Income'
         ? txn.additions?.creditAcctNo
@@ -151,7 +151,7 @@ export class Techcombank {
       amount: type === 'Income' ? amount : -amount,
       date: txn.creationTime,
       note,
-      autoMetadata: bankMetadata,
+      bankMetadata,
       bankNo: bankNo?.substring(bankNo?.length - 4),
     });
   }

@@ -50,6 +50,6 @@ export interface PaymentReceiptRecord {
   amount: number;
   date: string;
   note: string;
-  autoMetadata: string;
+  bankMetadata: string;
   bankNo: string;
 }

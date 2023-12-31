@@ -3,6 +3,12 @@ import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { PaymentReceiptRecord } from './types.ts';
 import assert from 'assert';
 
+const bankAccountMap = new Map([
+  ['4019', '43e0b6c7326e47e9be0a4646b6bd013e'],
+  ['8989', 'd6e314b455344c899d07aa4fa35ff002'],
+  ['4010', '79cced8217b14f559784e79549a308e4'],
+]);
+
 export class PaymentReceipt {
   public static _instance: PaymentReceipt;
 
@@ -69,8 +75,19 @@ export class PaymentReceipt {
         Amount: { number: item.amount },
         Date: { date: { start: item.date } },
         Note: { rich_text: [{ text: { content: item.note } }] },
-        autoMetadata: { rich_text: [{ text: { content: item.autoMetadata } }] },
-        'Bank no': { select: { name: item.bankNo } },
+        bankMetadata: {
+          rich_text: [
+            {
+              text: { content: item.bankMetadata },
+              annotations: { code: true },
+            },
+          ],
+        },
+        Account: {
+          relation: [
+            { id: bankAccountMap.get(item?.bankNo ?? '4010') as string },
+          ],
+        },
       },
     });
     if (this._notificationUserId) {
@@ -81,6 +98,28 @@ export class PaymentReceipt {
           { text: { content: '\nNew transaction from bank statement' } },
         ],
       });
+    }
+  }
+
+  public async deleteMany() {
+    let hasMore = true;
+    while (hasMore) {
+      const pageIds = await this._client.databases.query({
+        database_id: this._databaseId,
+        page_size: 100,
+        filter: {
+          property: 'Note',
+          rich_text: { contains: 'From automation' },
+        },
+      });
+      if (pageIds.results.length === 0) {
+        hasMore = false;
+      }
+      await Promise.all(
+        pageIds.results.map((page) =>
+          this._client.pages.update({ page_id: page.id, archived: true })
+        )
+      );
     }
   }
 }
