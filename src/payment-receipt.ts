@@ -65,6 +65,7 @@ export class PaymentReceipt {
   }
 
   public async create(item: Omit<PaymentReceiptRecord, 'id'>) {
+    const account = bankAccountMap.get(item?.bankNo ?? '4010');
     const result = await this._client.pages.create({
       parent: { database_id: this._databaseId },
       properties: {
@@ -83,11 +84,11 @@ export class PaymentReceipt {
             },
           ],
         },
-        Account: {
-          relation: [
-            { id: bankAccountMap.get(item?.bankNo ?? '4010') as string },
-          ],
-        },
+        ...(account && {
+          Account: {
+            relation: [{ id: account }],
+          },
+        }),
       },
     });
     if (this._notificationUserId) {
